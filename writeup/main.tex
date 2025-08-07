@@ -1,11 +1,13 @@
 \documentclass{article}
 
 \usepackage{preamble}
-\usepackage[backend=biber,style=numeric,defernumbers=true]{biblatex}
+\usepackage[backend=biber,style=authoryear,defernumbers=true]{biblatex}
 \addbibresource{refs.bib}
+\providecommand{\insertbiblabel}{}
 
 \newcommand{\random}{\ensuremath{\mathop{random}}}
 \newcommand{\randint}{\ensuremath{\mathop{randint}}}
+\newcommand{\iid}{\overset{iid}{\sim}}
 
 \title{Summer of Math Exposition 4: Sampling}
 \author{Ian Chen}
@@ -23,7 +25,9 @@ See \S\ref{sec:prereq} for a refresher.
 % TODO: maybe add a background section?
 
 In \S\ref{sec:problem}, we develop the problem and a simple solution.
-Then, releasing the assumption that we know the population size, we explore a simple type of resevoir sampling algorithm in \S\ref{sec:bottomk}, and refine it to optimality in \S\ref{sec:resevoir}.
+Then, releasing the assumption that we know the population size, we explore a simple type of resevoir sampling algorithm in \S\ref{sec:bottomk} and an application in \S\ref{sec:reach}.
+Finally, we refine it to optimality in \S\ref{sec:resevoir}.
+Proofs for some theorems are in \S\ref{sec:proofs}, but I encourage the reader to attempt them as exercises.
 
 \section{Problem Definition}
 \label{sec:problem}
@@ -39,26 +43,84 @@ Here's an example:
 
 There are a few properties of this approach that can be undesireable, which all stem from the fact that we need to store the entire data stream.
 This is because we make multiple passes of the data, first in finding the sum of all the weights, and a new pass when selecting an element (and removing).
-From here on, we explore resevoir sampling~\cite{vitter85-03}, which are single-pass sampling techniques.
+From here on, we explore resevoir sampling~(\cite{vitter85-03}), which are single-pass sampling techniques.
 
 \section{Bottom-k Sampling}
 \label{sec:bottomk}
 
 First, let us assume unit weights, namely $w_i = 1$.
+Then, we can select a random element by assigning a random key $y_i$ for each $x_i$, and picking the minimum.
+Moreover, we can select $k$ items by picking the $k$ smallest keys.
+The correctness is established by the following theorem.
 
-For a survey~\cite{cohen07-08}.
+\begin{theorem}
+	\label{thm:rank}
+	Let $Y_1, \ldots, Y_n \iid Y$, and suppose WLOG that they are distinct.
+	Then, $\Pr{r_i \le k} = \frac{k}{n}$, where $r_i = \abs{\set{Y_j \mid Y_j \le Y_i}}$ is the rank of $Y_i$.
+\end{theorem}
+
+Now, suppose that the weights are not unit weight, we need to generate the keys $y_i$ according to the weight $w_i$.
+One approach given by~\cite{cohen07-08} is to do this using the exponential distribution.
+Note that we can generate an exponential distribution from $U \sim U(0, 1)$ by the transform $- \theta \log(U) \sim Exp(\theta)$.
+% TODO: visual proof for this?
 
 \subsection{Application}
-For the main algorithm of estimating reach sizes~\cite{cohen97-12}.
+\label{sec:reach}
+
+This section requires terminology of graph theory and can be skipped.
+It is adapted from \S3 of ~\cite{cohen97-12}.
+
+Suppose we have a simple directed graph $G = (V, E)$ with \emph{vertex weights}.
+For each vertex $v \in V$, we want to sample $k$ vertices (w/o replacement) from its $2$-hop neighborhood, with probability proportional to the vertex weights.
+\cite{cohen97-12} use this sample to estimate the size of the neighborhood, but we focus more on the sampling process here.
+
+Following the ideas developed in \S\ref{sec:bottomk}, we first assign a random key for each vertex.
+Then, for each vertex, we need to compute the $k$ least keys in its neighborhood.
+
+% TODO: algorithm
+\Program{
+	\> \Algorithm{SampleFromNeighborhood}($V$, $E$, $k$): \\
+	\> \> \For $i$ from $1 \to k$: \\
+	\> \> \> Generate $y_j \sim Exp(w_j)$ for all $j$ \\
+	\> \> \> \For $j$ in increasing $y_j$ order: \\
+	\> \> \> \> \If $v_j$ is done, then skip \\
+	\> \> \> \> $N \gets$ two-hop neighborhood of $v_j$ \\
+	\> \> \> \> \For $u \in N$: \\
+	\> \> \> \> \> Add $v_j$ to $S(u)$ if $u$ has not been added this iteration yet \\
+	\> \> \> \> \> Mark $u$ as done
+}
+
+\begin{theorem}
+	For each vertex, we can collect samples of $k$ vertices (w/o) replacement from its 2-hop neighborhood in $O(k(n \log n + m))$ time.
+\end{theorem}
+
+\begin{proof}
+	First, we find that Algorithm x correctly solves the problem because for each vertex, it finds the minimum $k$ keys in its reachability set.
+	Thus, by our analysis in \S\ref{sec:bottomk}, we correctly generate a weighted sample.
+
+	Now, we prove the runtime.
+	Consider an iteration of the algorithm.
+	First, we generate random weights, which is done in $O(n)$ time, and sort them in $O(n \log n)$ time.
+	Finally, we proceed by doing a reachability search, which visits every edge at most once and so takes $O(m)$ time.
+	Repeating this algorithm $k$ times, we obtain a final runtime of $O(k(n \log n + m))$.
+\end{proof}
 
 \section{Optimal Resevoir Sampling}
 \label{sec:resevoir}
 
-For optimality~\cite{vitter85-03}.
-For the unweighted,~\cite{li94-12}, and the weighted,~\cite{efraimidis06-03}.
+For optimality, see ~\cite{vitter85-03}.
+See~\cite{li94-12} for unweighted resevoir sampling, and ~\cite{efraimidis06-03} for weighted sampling.
 
 \section{Prerequisites}
 \label{sec:prereq}
+
+\section{Proofs}
+\label{sec:proofs}
+
+\begin{proof}[Theorem \ref{thm:rank}]
+	Suppose this.
+	Then, we win.
+\end{proof}
 
 % References
 \printbibliography
