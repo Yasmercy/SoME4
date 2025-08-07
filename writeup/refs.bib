@@ -1,0 +1,103 @@
+@article{vitter85-03,
+    author = {Vitter, Jeffrey S.},
+    title = {Random sampling with a reservoir},
+    year = {1985},
+    issue_date = {March 1985},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {11},
+    number = {1},
+    issn = {0098-3500},
+    url = {https://doi.org/10.1145/3147.3165},
+    doi = {10.1145/3147.3165},
+    abstract = {We introduce fast algorithms for selecting a random sample of n
+                records without replacement from a pool of N records, where the
+                value of N is unknown beforehand. The main result of the paper is
+                the design and analysis of Algorithm Z; it does the sampling in
+                one pass using constant space and in O(n(1 + log(N/n))) expected
+                time, which is optimum, up to a constant factor. Several
+                optimizations are studied that collectively improve the speed of
+                the naive version of the algorithm by an order of magnitude. We
+                give an efficient Pascal-like implementation that incorporates
+                these modifications and that is suitable for general use.
+                Theoretical and empirical results indicate that Algorithm Z
+                outperforms current methods by a significant margin.},
+    journal = {ACM Trans. Math. Softw.},
+    month = mar,
+    pages = {37–57},
+    numpages = {21},
+}
+@article{li94-12,
+    author = {Li, Kim-Hung},
+    title = {Reservoir-sampling algorithms of time complexity O(n(1 + log(N/n)))
+             },
+    year = {1994},
+    issue_date = {Dec. 1994},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {20},
+    number = {4},
+    issn = {0098-3500},
+    url = {https://doi.org/10.1145/198429.198435},
+    doi = {10.1145/198429.198435},
+    abstract = {One-pass algorithms for sampling n records without replacement
+                from a population of unknown size n are known as
+                reservoir-sampling algorithms. In this article, Vitter's
+                reservoir-sampling algorithm, algorithm Z, is modified to give a
+                more efficient algorithm, algorithm K. Additionally, two new
+                algorithms, algorithm L and algorithm M, are proposed. If the
+                time for scanning the population is ignored, all the four
+                algorithms have expected CPU time O(n(1 + log(N/n))), which is
+                optimum up to a constant factor. Expressions of the expected CPU
+                time for the algorithms are presented. Among the four, algorithm
+                L is the simplest, and algorithm M is the most efficient when n
+                and N/n are large and N is O(n2).},
+    journal = {ACM Trans. Math. Softw.},
+    month = dec,
+    pages = {481–493},
+    numpages = {13},
+    keywords = {analysis of algorithms, random sampling, reservoir},
+}
+@article{efraimidis06-03,
+    title = {Weighted random sampling with a reservoir},
+    volume = {97},
+    ISSN = {0020-0190},
+    url = {http://dx.doi.org/10.1016/j.ipl.2005.11.003},
+    DOI = {10.1016/j.ipl.2005.11.003},
+    number = {5},
+    journal = {Information Processing Letters},
+    publisher = {Elsevier BV},
+    author = {Efraimidis, Pavlos S. and Spirakis, Paul G.},
+    year = {2006},
+    month = mar,
+    pages = {181–185},
+}
+@article{cohen97-12,
+    title = {Size-Estimation Framework with Applications to Transitive Closure
+             and Reachability},
+    volume = {55},
+    ISSN = {0022-0000},
+    url = {http://dx.doi.org/10.1006/jcss.1997.1534},
+    DOI = {10.1006/jcss.1997.1534},
+    number = {3},
+    journal = {Journal of Computer and System Sciences},
+    publisher = {Elsevier BV},
+    author = {Cohen, Edith},
+    year = {1997},
+    month = dec,
+    pages = {441–453},
+}
+@inproceedings{cohen07-08,
+    series = {PODC07},
+    title = {Summarizing data using bottom-k sketches},
+    url = {http://dx.doi.org/10.1145/1281100.1281133},
+    DOI = {10.1145/1281100.1281133},
+    booktitle = {Proceedings of the twenty-sixth annual ACM symposium on
+                 Principles of distributed computing},
+    publisher = {ACM},
+    author = {Cohen, Edith and Kaplan, Haim},
+    year = {2007},
+    month = aug,
+    pages = {225–234},
+    collection = {PODC07},
+}

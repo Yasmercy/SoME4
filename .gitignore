@@ -1,0 +1,5 @@
+writeup/*
+!writeup/*.tex
+!writeup/*.pdf
+!writeup/*.sty
+!writeup/refs.bib
