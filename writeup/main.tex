@@ -5,10 +5,6 @@
 \addbibresource{refs.bib}
 \providecommand{\insertbiblabel}{}
 
-\newcommand{\random}{\ensuremath{\mathop{random}}}
-\newcommand{\randint}{\ensuremath{\mathop{randint}}}
-\newcommand{\iid}{\overset{iid}{\sim}}
-
 \title{Summer of Math Exposition 4: Sampling}
 \author{Ian Chen}
 
@@ -17,7 +13,7 @@
 \maketitle
 
 Sampling is a fundamental part in statistical studies.
-Instead of collecting data from a large population, which is often infeasible at worse and expensive at best, statisticians collect a \emphi{representative sample} and infer conclusions about the population from the sample.
+Instead of collecting data from a large population, which is often infeasible at worse and expensive at best, statisticians collect a \emph{representative sample} and infer conclusions about the population from the sample.
 Here, we will explore algorithms to efficiently sample from data streams.
 
 We expect a prerequisite knowledge of Big-O and elementary probability.
@@ -40,6 +36,10 @@ We are allowed to use the \random(), generating a uniform real in $[0, 1)$, and 
 
 % probability mass function approach
 Here's an example:
+% idea 1: divide the [0, 1] into intervals proportional to the weight
+%   - pick a point at random
+%   - then, we can draw a picture by "extending" it into the 2D pmf
+%   - same as saying its the F^{-1}(U) "direct sampling" method, i.e. picking the right interval in the limit
 
 There are a few properties of this approach that can be undesireable, which all stem from the fact that we need to store the entire data stream.
 This is because we make multiple passes of the data, first in finding the sum of all the weights, and a new pass when selecting an element (and removing).
@@ -55,14 +55,44 @@ The correctness is established by the following theorem.
 
 \begin{theorem}
 	\label{thm:rank}
-	Let $Y_1, \ldots, Y_n \iid Y$, and suppose WLOG that they are distinct.
+	Let $Y_1, \ldots, Y_n \simiid Y$, and suppose WLOG that they are distinct.
 	Then, $\Pr{r_i \le k} = \frac{k}{n}$, where $r_i = \abs{\set{Y_j \mid Y_j \le Y_i}}$ is the rank of $Y_i$.
 \end{theorem}
 
 Now, suppose that the weights are not unit weight, we need to generate the keys $y_i$ according to the weight $w_i$.
 One approach given by~\cite{cohen07-08} is to do this using the exponential distribution.
-Note that we can generate an exponential distribution from $U \sim U(0, 1)$ by the transform $- \theta \log(U) \sim Exp(\theta)$.
+
+\begin{lemma}
+	Let $U_i \sim \UnifD(0, 1)$, and $E_{\theta_i} \sim \ExpD(\theta_i)$ all be independent.
+	Then,
+	\begin{enumerate}
+		\item $-\theta_i \log U_i \sim \ExpD(\theta_i)$.
+		\item $\min(E_{\theta_1}, \ldots, E_{\theta_{n}}) \sim \ExpD(\sum_i \theta_i)$
+		\item $\Pr{E_i < E_j} = \theta_i / (\theta_i + \theta_j)$
+		\item $\Pr{E_i > t + t_0 \mid E_i > t_0} = \Pr{E_i > t}$
+	\end{enumerate}
+\end{lemma}
 % TODO: visual proof for this?
+
+We generate a key according to the exponential distribution and take the items with the lowest-k keys as our sample.
+\begin{algorithm}
+	\caption{Bottom-K Sampling}
+	\begin{algorithmic}[1]
+		\Function{WeightedSample}{$D$, $k$}
+			\For{each $i$ in increasing order}
+				\State Generate $y_i \sim \ExpD(w_i)$
+				\If{$y_i$ is in the lowest $k$ keys explored so far}
+					\State Add $x_i$ to the sample
+				\EndIf
+			\EndFor
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+To show that this correctly generates a weighted random sample,
+\begin{proof}
+
+\end{proof}
 
 \subsection{Application}
 \label{sec:reach}
@@ -78,24 +108,35 @@ Following the ideas developed in \S\ref{sec:bottomk}, we first assign a random k
 Then, for each vertex, we need to compute the $k$ least keys in its neighborhood.
 
 % TODO: algorithm
-\Program{
-	\> \Algorithm{SampleFromNeighborhood}($V$, $E$, $k$): \\
-	\> \> \For $i$ from $1 \to k$: \\
-	\> \> \> Generate $y_j \sim Exp(w_j)$ for all $j$ \\
-	\> \> \> \For $j$ in increasing $y_j$ order: \\
-	\> \> \> \> \If $v_j$ is done, then skip \\
-	\> \> \> \> $N \gets$ two-hop neighborhood of $v_j$ \\
-	\> \> \> \> \For $u \in N$: \\
-	\> \> \> \> \> Add $v_j$ to $S(u)$ if $u$ has not been added this iteration yet \\
-	\> \> \> \> \> Mark $u$ as done
-}
+\begin{algorithm}
+	\caption{Sampling from 2-Hop Neighborhood}
+	\begin{algorithmic}[1]
+		\Function{Sample2Hop}{$V$, $E$, $k$}
+			\For{$i$ from $1 \to k$}
+				\State Generate $y_j \sim \ExpD(w_i)$
+				\For{$j$ in increasing $y_j$}
+					\If{$v_j$ is done}
+						\State \textbf{continue}
+					\EndIf
+					\For{$u \in$ two-hop neighborhood of $v_j$}
+						\State Add $v_j$ to $S_u$ if $u$ has not been added to yet
+						\State Remove edges incident to $u$
+						\State Mark $u$ as done
+					\EndFor
+				\EndFor
+			\EndFor
+			\Return $\set{S_i}$
+		\EndFunction
+	\end{algorithmic}
+	\label{alg:sample2hop}
+\end{algorithm}
 
 \begin{theorem}
 	For each vertex, we can collect samples of $k$ vertices (w/o) replacement from its 2-hop neighborhood in $O(k(n \log n + m))$ time.
 \end{theorem}
 
 \begin{proof}
-	First, we find that Algorithm x correctly solves the problem because for each vertex, it finds the minimum $k$ keys in its reachability set.
+	First, we find that Algorithm \ref{alg:sample2hop} correctly solves the problem because for each vertex, it finds the minimum $k$ keys in its reachability set.
 	Thus, by our analysis in \S\ref{sec:bottomk}, we correctly generate a weighted sample.
 
 	Now, we prove the runtime.

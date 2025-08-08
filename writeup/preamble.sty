@@ -6,16 +6,35 @@
 \usepackage{amsthm}
 \usepackage{derivative}
 \usepackage[super]{nth}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   aux
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\oneD}{\textsf{1D}\xspace}
+\newcommand{\twoD}{\textsf{2D}\xspace}
+\newcommand{\threeD}{\textsf{3D}\xspace}
+\newcommand{\kD}{\textsf{kD}\xspace}
+
+\newcommand{\squigto}{\rightsquigarrow}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   math
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 
 \usepackage{stmaryrd}%
 \newcommand{\set}[1]{\left\{ #1 \right\}}
 \newcommand{\avg}[1]{\langle #1 \rangle}
+\newcommand{\nat}[1]{\llbracket #1 \rrbracket}
+\renewcommand{\bar}{\overline}
 
 \renewcommand{\abs}[1]{\left| \bigr. #1 \right|}
 \renewcommand{\exp}[1]{\mathop{\mathbf{exp}}\set{#1}}
+
+\newcommand{\mathsc}[1]{{\normalfont\textsc{#1}}}
 
 \renewcommand{\Pr}[1]{\mathop{\mathbf{Pr}\!\left(#1\right)}}
 \newcommand{\Ev}[1]{\mathop{\mathbf{E}\!\left(#1\right)}}
@@ -26,28 +45,18 @@
 \providecommand{\C}{\mathbb{C}}
 \providecommand{\N}{\mathbb{N}}
 
-\newcommand{\mathsc}[1]{{\normalfont\textsc{#1}}}
-\newcommand{\IRX}[1]{\llbracket #1 \rrbracket}
+\newcommand{\random}{\ensuremath{\mathop{random}}}
+\newcommand{\randint}{\ensuremath{\mathop{randint}}}
+\newcommand{\simiid}{\overset{iid}{\sim}}
+\newcommand{\eqd}{\overset{d}{=}}
 
-\newcommand{\notestitle}[1]
-{
-	\title{#1}
-	\author{Ian Chen $\ll$ianchen3$\gg$}
-	\date{\today}
-	\maketitle
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   aux
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\oneD}{\textsf{1D}\xspace}
-\newcommand{\twoD}{\textsf{2D}\xspace}
-\newcommand{\threeD}{\textsf{3D}\xspace}
-\newcommand{\kD}{\textsf{kD}\xspace}
-
-\renewcommand{\bar}{\overline}
-
-\newcommand{\squigto}{\rightsquigarrow}
+\DeclareMathOperator{\GammaD}{Gamma}
+\DeclareMathOperator{\ExpD}{Exp}
+\DeclareMathOperator{\GeomD}{Geom}
+\DeclareMathOperator{\BinomD}{Bin}
+\DeclareMathOperator{\UnifD}{Uniform}
+\DeclareMathOperator{\NormalD}{Normal}
+\DeclareMathOperator{\ChiD}{\mathcal{X}^2}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  graph stuff
@@ -158,136 +167,6 @@
 \renewcommand\cftsubsubsecdotsep{\cftdot}
 
 \usepackage[parfill]{parskip}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  program macros 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\Do}{{\small\bf do}\ }
-\newcommand{\End}{{\small\bf end}\ }
-\newcommand{\Return}{{\small\bf return\ }}
-\newcommand{\Proc}[1]{#1\+}
-\newcommand{\Returns}{{\small\bf returns}}
-\newcommand{\Procbegin}{{\small\bf begin}}
-\newcommand{\If}{{\small\bf if}\ }
-\newcommand{\Then}{{\small\bf then}\ }
-\newcommand{\Continue}{{\small\bf continue}\ }
-\newcommand{\Else}{{\small\bf else}\ }
-\newcommand{\rElse}{{\small\bf else}\ }
-\newcommand{\Elseif}{{\small\bf elseif}\ }
-\newcommand{\Foreach}{{\small\bf for each}\ }
-\newcommand{\Endif}{{\small\bf end\ if\ }}
-\newcommand{\Break}{{\small\bf break }}
-\newcommand{\Endproc}[1]{{\small\bf end} #1}
-\newcommand{\For}{{\small\bf for}\ }
-\newcommand{\Endfor}{{\small\bf end\ for}}
-\newcommand{\While}{{\small\bf while}\ }
-\newcommand{\Endwhile}{{\small\bf end\ while}}
-\newcommand{\LogAnd}{{\small\bf and}}
-\newcommand{\ow}{{\small\bf otherwise}\ }
-
-\newcommand{\DotProd}[2]{\permut{{#1},{#2}}}
-
-\newcommand{\Repeat}{{\small\bf repeat}\ }
-\newcommand{\Until}{{\small\bf Until}}
-\newcommand{\Loop}{{\bf loop}\ }
-\newcommand{\Endloop}{{\bf end\ loop}\ }
-
-\newcommand{\xbeginlgox}{\begin{minipage}{1in}\begin{tabbing}
-			\quad\=\qquad\=\qquad\=\qquad\=\qquad\=\qquad\=\qquad\=\kill}
-			\newcommand{\xendlgox}{\end{tabbing}\end{minipage}}
-\newenvironment{algorithm}{\begin{tabular}{|l|}\hline\xbeginlgox}
-		{\xendlgox \\\hline\end{tabular}}
-
-\newenvironment{program}{
-	\begin{minipage}{4.0in}
-		\begin{tabbing}
-			\= \ \ \ \= \ \ \ \ \= \ \ \ \ \= \ \ \ \ \=
-			\ \ \ \ \= \ \ \ \ \= \ \ \ \ \= \ \ \ \ \=
-			\ \ \ \ \= \ \ \ \ \= \ \ \ \ \= \ \ \ \ \= \kill
-			}{
-		\end{tabbing}
-	\end{minipage}
-}
-\newcommand{\Program}[1]{%
-
-	\medskip%
-
-	\centerline{%
-		\AlgorithmBox{%
-			#1%
-		}%
-	}%
-
-	\medskip}
-
-
-\newenvironment{algorithmEnv}{
-	\begin{tabular}{|l|}\hline\xbeginlgox\bigskip}
-		{\xendlgox \\\hline\end{tabular}}
-
-\newcommand{\AlgorithmBox}[1]{
-	\fbox{\begin{program}
-			#1
-		\end{program}
-	}
-}
-
-
-\DefineNamedColor{named}{RedViolet} {cmyk}{0.07,0.90,0,0.34}
-
-\newcommand{\AlgorithmI}[1]{{\textcolor[named]{RedViolet}{\texttt{\bf{#1}}}}}
-\newcommand{\Algorithm}[1]{{\AlgorithmI{#1}\index{algorithm!#1@{\AlgorithmI{#1}}}}}
-
-\newcommand{\DFS}{\Algorithm{DFS}\xspace}
-
-\newcommand{\TermText}[1]{\textsf{#1}}
-\newcommand{\Term}[1]{\TermText{#1}}
-\newcommand{\TermI}[1]{\Term{#1}\index{#1@\Term{#1}}}
-
-\newcommand{\MST} {\TermI{MST}\xspace}
-\newcommand{\BFS} {\Algorithm{BFS}\xspace}
-\newcommand{\DAG} {\TermI{DAG}\xspace}
-\newcommand{\LCA} {\TermI{LCA}\xspace}
-
-\definecolor{blue25}{rgb}{0,0,0.65}
-\newcommand{\emphic}[2]{%
-	\textcolor{blue25}{%
-		\textbf{\emph{#1}}}%
-	\index{#2}}
-\newcommand{\emphi}[1]{\emphic{#1}{#1}}
-\newcommand{\emphColor}[1]{\textcolor{blue25}{%                                 
-		\textbf{\emph{#1}}}}
-
-
-\newcommand{\floor}[1]{\lfloor #1 \rfloor}
-\newcommand{\ceil}[1]{\left\lceil {#1} \right\rceil}
-\newcommand{\Prob}[1]{\mathop{\mathbf{Pr}}\!\pbrcx{#1}}
-%\newcommand{\points}[1]{(#1 pts.)}
-
-\newcommand{\dfsPre}{\ensuremath{\mathrm{pre}}}
-\newcommand{\dfsPost}{\ensuremath{\mathrm{post}}}
-
-\newcommand{\hr}{\noindent \rule{\linewidth}{0.2mm}}%
-\newcommand{\Hr}{\noindent \rule{\linewidth}{0.4mm}}%
-
-\newcommand{\HrT}{%\
-	\noindent%
-	\hrule height1.4pt width \linewidth depth0pt%
-}
-
-
-\newcommand{\HrX}{%
-	\noindent \hspace{-0.5\linewidth}%
-	\rule{2\linewidth}{0.8mm}%
-}%
-
-\newcommand{\si}[1]{#1}
-
-\newcommand{\figlab}[1]{\label{fig:#1}}
-\newcommand{\figref}[1]{Figure~\ref{fig:#1}}
-
-\newcommand{\eqlab}[1]{\label{equation:#1}}
-\newcommand{\Eqref}[1]{Eq.~(\ref{equation:#1})}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   tikz
