@@ -28,11 +28,10 @@ Proofs for some theorems are in \S\ref{sec:proofs}, but I encourage the reader t
 \section{Problem Definition}
 \label{sec:problem}
 
-Let $D = (x_1, x_2, \ldots)$ be a data stream with weights $(w_1, w_2, \ldots)$.
+Let $D = (x_1, x_2, \ldots, x_N)$.
 Let $k$ be the number of samples we wish the collect, and $N$ the size of the stream (if known).
-We wish to compute a sample $S(D) \subset D$, where $\Pr{x_i \in S(D)} \propto w_i$ and $\abs{S(D)} = \min(n, \abs{D})$.
-That is, we want to sample without replacement.
-We are allowed to use the \random(), generating a uniform real in $[0, 1)$, and the \randint(a, b), generating a uniform integer in $[a, b]$, functions.
+We wish to compute a sample (w/o replacement) $S(D) \subset D$, where each $x_i$ has an equal chance of being in the sample, and $\abs{S(D)} = \min(n, \abs{D})$.
+We are allowed to use the functions \random(), generating a uniform real in $[0, 1)$, and the \randint(a, b), generating a uniform integer in $[a, b]$.
 
 % probability mass function approach
 Here's an example:
@@ -48,51 +47,31 @@ From here on, we explore resevoir sampling~(\cite{vitter85-03}), which are singl
 \section{Bottom-k Sampling}
 \label{sec:bottomk}
 
-First, let us assume unit weights, namely $w_i = 1$.
-Then, we can select a random element by assigning a random key $y_i$ for each $x_i$, and picking the minimum.
+The key idea here is that we can select a random element by assigning a random key $y_i$ for each $x_i$, and picking the minimum.
 Moreover, we can select $k$ items by picking the $k$ smallest keys.
-The correctness is established by the following theorem.
 
+\begin{algorithm}
+	\caption{Bottom-k Sampling}
+	\begin{algorithmic}[1]
+		\Function{GenerateSample}{$D$, $k$}
+			\State Initialize a resevoir with the first $k$ keys
+			\For{each $i > k$ in increasing order}
+				\State $y_i \gets \random()$
+				\If{$y_i$ is in the lowest $k$ keys explored so far}
+					\State Update the resevoir to include $x_i$ (and remove the largest)
+				\EndIf
+			\EndFor
+		\EndFunction
+	\end{algorithmic}
+	\label{alg:bottomk}
+\end{algorithm}
+
+The correctness follows from the following theorem.
 \begin{theorem}
 	\label{thm:rank}
 	Let $Y_1, \ldots, Y_n \simiid Y$, and suppose WLOG that they are distinct.
 	Then, $\Pr{r_i \le k} = \frac{k}{n}$, where $r_i = \abs{\set{Y_j \mid Y_j \le Y_i}}$ is the rank of $Y_i$.
 \end{theorem}
-
-Now, suppose that the weights are not unit weight, we need to generate the keys $y_i$ according to the weight $w_i$.
-One approach given by~\cite{cohen07-08} is to do this using the exponential distribution.
-
-\begin{lemma}
-	Let $U_i \sim \UnifD(0, 1)$, and $E_{\theta_i} \sim \ExpD(\theta_i)$ all be independent.
-	Then,
-	\begin{enumerate}
-		\item $-\theta_i \log U_i \sim \ExpD(\theta_i)$.
-		\item $\min(E_{\theta_1}, \ldots, E_{\theta_{n}}) \sim \ExpD(\sum_i \theta_i)$
-		\item $\Pr{E_i < E_j} = \theta_i / (\theta_i + \theta_j)$
-		\item $\Pr{E_i > t + t_0 \mid E_i > t_0} = \Pr{E_i > t}$
-	\end{enumerate}
-\end{lemma}
-% TODO: visual proof for this?
-
-We generate a key according to the exponential distribution and take the items with the lowest-k keys as our sample.
-\begin{algorithm}
-	\caption{Bottom-K Sampling}
-	\begin{algorithmic}[1]
-		\Function{WeightedSample}{$D$, $k$}
-			\For{each $i$ in increasing order}
-				\State Generate $y_i \sim \ExpD(w_i)$
-				\If{$y_i$ is in the lowest $k$ keys explored so far}
-					\State Add $x_i$ to the sample
-				\EndIf
-			\EndFor
-		\EndFunction
-	\end{algorithmic}
-\end{algorithm}
-
-To show that this correctly generates a weighted random sample,
-\begin{proof}
-
-\end{proof}
 
 \subsection{Application}
 \label{sec:reach}
@@ -100,8 +79,7 @@ To show that this correctly generates a weighted random sample,
 This section requires terminology of graph theory and can be skipped.
 It is adapted from \S3 of ~\cite{cohen97-12}.
 
-Suppose we have a simple directed graph $G = (V, E)$ with \emph{vertex weights}.
-For each vertex $v \in V$, we want to sample $k$ vertices (w/o replacement) from its $2$-hop neighborhood, with probability proportional to the vertex weights.
+For each vertex $v \in V$, we want to sample $k$ vertices (w/o replacement) from its $2$-hop neighborhood.
 \cite{cohen97-12} use this sample to estimate the size of the neighborhood, but we focus more on the sampling process here.
 
 Following the ideas developed in \S\ref{sec:bottomk}, we first assign a random key for each vertex.
@@ -113,7 +91,7 @@ Then, for each vertex, we need to compute the $k$ least keys in its neighborhood
 	\begin{algorithmic}[1]
 		\Function{Sample2Hop}{$V$, $E$, $k$}
 			\For{$i$ from $1 \to k$}
-				\State Generate $y_j \sim \ExpD(w_i)$
+				\State $y_j \gets \random$
 				\For{$j$ in increasing $y_j$}
 					\If{$v_j$ is done}
 						\State \textbf{continue}
@@ -137,7 +115,7 @@ Then, for each vertex, we need to compute the $k$ least keys in its neighborhood
 
 \begin{proof}
 	First, we find that Algorithm \ref{alg:sample2hop} correctly solves the problem because for each vertex, it finds the minimum $k$ keys in its reachability set.
-	Thus, by our analysis in \S\ref{sec:bottomk}, we correctly generate a weighted sample.
+	Thus, by our analysis in \S\ref{sec:bottomk}, we correctly generate a sample.
 
 	Now, we prove the runtime.
 	Consider an iteration of the algorithm.
@@ -146,11 +124,35 @@ Then, for each vertex, we need to compute the $k$ least keys in its neighborhood
 	Repeating this algorithm $k$ times, we obtain a final runtime of $O(k(n \log n + m))$.
 \end{proof}
 
-\section{Optimal Resevoir Sampling}
+\section{Improved Resevoir Sampling}
 \label{sec:resevoir}
 
-For optimality, see ~\cite{vitter85-03}.
-See~\cite{li94-12} for unweighted resevoir sampling, and ~\cite{efraimidis06-03} for weighted sampling.
+There is one more trick that we can apply to speed up the algorithm even further.
+Consider how much information we need to simulate the output of Algorithm \ref{alg:bottomk}; all we need to know is which indices do we update our resevoir of $k$ smallest keys.
+In fact, the gap between indices follow a geometric distribution, and Algorithm \ref{alg:bottomk} is just a complicated way of generating a geometric distribution.
+Using this observation, we can avoid examining each item one by one and instead skip between items~(\cite{li94-12, efraimidis06-03}):
+\begin{algorithm}
+	\begin{algorithmic}[1]
+		\Function{GenerateSampleFast}{$D$, $k$}
+			\State Initialize a resevoir with the first $k$ keys
+			\State $i \gets k + 1$
+			\Comment{the current index}
+			\State $M \gets \random()^{1/k}$
+			\Comment{distributed like $\max_{1 \le j \le j}(\UnifD(0, 1))$}
+			\State $m \gets - \ln( \random() ) / M$
+			\Comment{$\GeomD(M)$, the steps before find a uniform with value $\le$ M}
+			\While{$i + m \le N$}
+				\State $i \gets i + m$
+				\State Replace a random item in resevoir with $x_{i}$
+				\State $M \gets M \cdot \random()^{1/k}$
+				\Comment{distributed like $\max_{1 \le j \le j}(\UnifD(0, M))$}
+				\State $m \gets - \ln( \random() ) / M$
+				\Comment{$\GeomD(M)$, the steps before find a uniform with value $\le$ M}
+			\EndWhile
+		\EndFunction
+	\end{algorithmic}
+	\label{alg:samplejumps}
+\end{algorithm}
 
 \section{Prerequisites}
 \label{sec:prereq}
