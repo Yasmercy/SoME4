@@ -1,6 +1,8 @@
-import numpy as np
-import igraph
 import heapq
+
+import igraph
+
+import numpy as np
 
 
 def exp(theta=1):

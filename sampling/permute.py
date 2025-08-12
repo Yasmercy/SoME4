@@ -1,7 +1,4 @@
-import numpy as np
-
-
-def sample_permute(stream, k):
+def sample_permute(stream, k, rng):
     arr = list(stream)
-    arr = np.random.permutation(arr)
+    arr = rng.permutation(arr)
     return arr[:k]
