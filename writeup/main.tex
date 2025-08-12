@@ -51,26 +51,26 @@ The key idea here is that we can select a random element by assigning a random k
 Moreover, we can select $k$ items by picking the $k$ smallest keys.
 
 \begin{algorithm}
-	\caption{Bottom-k Sampling}
-	\begin{algorithmic}[1]
-		\Function{GenerateSample}{$D$, $k$}
-			\State Initialize a resevoir with the first $k$ keys
-			\For{each $i > k$ in increasing order}
-				\State $y_i \gets \random()$
-				\If{$y_i$ is in the lowest $k$ keys explored so far}
-					\State Update the resevoir to include $x_i$ (and remove the largest)
-				\EndIf
-			\EndFor
-		\EndFunction
-	\end{algorithmic}
-	\label{alg:bottomk}
+    \caption{Bottom-k Sampling}
+    \begin{algorithmic}[1]
+        \Function{GenerateSample}{$D$, $k$}
+            \State Initialize a resevoir with the first $k$ keys
+            \For{each $i > k$ in increasing order}
+                \State $y_i \gets \random()$
+                \If{$y_i$ is in the lowest $k$ keys explored so far}
+                    \State Update the resevoir to include $x_i$ (and remove the largest)
+                \EndIf
+            \EndFor
+        \EndFunction
+    \end{algorithmic}
+    \label{alg:bottomk}
 \end{algorithm}
 
 The correctness follows from the following theorem.
 \begin{theorem}
-	\label{thm:rank}
-	Let $Y_1, \ldots, Y_n \simiid Y$, and suppose WLOG that they are distinct.
-	Then, $\Pr{r_i \le k} = \frac{k}{n}$, where $r_i = \abs{\set{Y_j \mid Y_j \le Y_i}}$ is the rank of $Y_i$.
+    \label{thm:rank}
+    Let $Y_1, \ldots, Y_n \simiid Y$, and suppose WLOG that they are distinct.
+    Then, $\Pr{r_i \le k} = \frac{k}{n}$, where $r_i = \abs{\set{Y_j \mid Y_j \le Y_i}}$ is the rank of $Y_i$.
 \end{theorem}
 
 \subsection{Application}
@@ -87,41 +87,41 @@ Then, for each vertex, we need to compute the $k$ least keys in its neighborhood
 
 % TODO: algorithm
 \begin{algorithm}
-	\caption{Sampling from 2-Hop Neighborhood}
-	\begin{algorithmic}[1]
-		\Function{Sample2Hop}{$V$, $E$, $k$}
-			\For{$i$ from $1 \to k$}
-				\State $y_j \gets \random$
-				\For{$j$ in increasing $y_j$}
-					\If{$v_j$ is done}
-						\State \textbf{continue}
-					\EndIf
-					\For{$u \in$ two-hop neighborhood of $v_j$}
-						\State Add $v_j$ to $S_u$ if $u$ has not been added to yet
-						\State Remove edges incident to $u$
-						\State Mark $u$ as done
-					\EndFor
-				\EndFor
-			\EndFor
-			\Return $\set{S_i}$
-		\EndFunction
-	\end{algorithmic}
-	\label{alg:sample2hop}
+    \caption{Sampling from 2-Hop Neighborhood}
+    \begin{algorithmic}[1]
+        \Function{Sample2Hop}{$V$, $E$, $k$}
+            \For{$i$ from $1 \to k$}
+                \State $y_j \gets \random$
+                \For{$j$ in increasing $y_j$}
+                    \If{$v_j$ is done}
+                        \State \textbf{continue}
+                    \EndIf
+                    \For{$u \in$ two-hop neighborhood of $v_j$}
+                        \State Add $v_j$ to $S_u$ if $u$ has not been added to yet
+                        \State Remove edges incident to $u$
+                        \State Mark $u$ as done
+                    \EndFor
+                \EndFor
+            \EndFor
+            \Return $\set{S_i}$
+        \EndFunction
+    \end{algorithmic}
+    \label{alg:sample2hop}
 \end{algorithm}
 
 \begin{theorem}
-	For each vertex, we can collect samples of $k$ vertices (w/o) replacement from its 2-hop neighborhood in $O(k(n \log n + m))$ time.
+    For each vertex, we can collect samples of $k$ vertices (w/o) replacement from its 2-hop neighborhood in $O(k(n \log n + m))$ time.
 \end{theorem}
 
 \begin{proof}
-	First, we find that Algorithm \ref{alg:sample2hop} correctly solves the problem because for each vertex, it finds the minimum $k$ keys in its reachability set.
-	Thus, by our analysis in \S\ref{sec:bottomk}, we correctly generate a sample.
+    First, we find that Algorithm \ref{alg:sample2hop} correctly solves the problem because for each vertex, it finds the minimum $k$ keys in its reachability set.
+    Thus, by our analysis in \S\ref{sec:bottomk}, we correctly generate a sample.
 
-	Now, we prove the runtime.
-	Consider an iteration of the algorithm.
-	First, we generate random weights, which is done in $O(n)$ time, and sort them in $O(n \log n)$ time.
-	Finally, we proceed by doing a reachability search, which visits every edge at most once and so takes $O(m)$ time.
-	Repeating this algorithm $k$ times, we obtain a final runtime of $O(k(n \log n + m))$.
+    Now, we prove the runtime.
+    Consider an iteration of the algorithm.
+    First, we generate random weights, which is done in $O(n)$ time, and sort them in $O(n \log n)$ time.
+    Finally, we proceed by doing a reachability search, which visits every edge at most once and so takes $O(m)$ time.
+    Repeating this algorithm $k$ times, we obtain a final runtime of $O(k(n \log n + m))$.
 \end{proof}
 
 \section{Improved Resevoir Sampling}
@@ -132,26 +132,27 @@ Consider how much information we need to simulate the output of Algorithm \ref{a
 In fact, the gap between indices follow a geometric distribution, and Algorithm \ref{alg:bottomk} is just a complicated way of generating a geometric distribution.
 Using this observation, we can avoid examining each item one by one and instead skip between items~(\cite{li94-12, efraimidis06-03}):
 \begin{algorithm}
-	\begin{algorithmic}[1]
-		\Function{GenerateSampleFast}{$D$, $k$}
-			\State Initialize a resevoir with the first $k$ keys
-			\State $i \gets k + 1$
-			\Comment{the current index}
-			\State $M \gets \random()^{1/k}$
-			\Comment{distributed like $\max_{1 \le j \le j}(\UnifD(0, 1))$}
-			\State $m \gets - \ln( \random() ) / M$
-			\Comment{$\GeomD(M)$, the steps before find a uniform with value $\le$ M}
-			\While{$i + m \le N$}
-				\State $i \gets i + m$
-				\State Replace a random item in resevoir with $x_{i}$
-				\State $M \gets M \cdot \random()^{1/k}$
-				\Comment{distributed like $\max_{1 \le j \le j}(\UnifD(0, M))$}
-				\State $m \gets - \ln( \random() ) / M$
-				\Comment{$\GeomD(M)$, the steps before find a uniform with value $\le$ M}
-			\EndWhile
-		\EndFunction
-	\end{algorithmic}
-	\label{alg:samplejumps}
+    \caption{GenerateSampleFast}
+    \begin{algorithmic}[1]
+        \Function{GenerateSampleFast}{$D$, $k$}
+            \State Initialize a resevoir with the first $k$ keys
+            \State $i \gets k + 1$
+            \Comment{the current index}
+            \State $M \gets \random()^{1/k}$
+            \Comment{distributed like $\max_{1 \le j \le j}(\UnifD(0, 1))$}
+            \State $m \gets - \ln( \random() ) / M$
+            \Comment{$\GeomD(M)$, the steps before find a uniform with value $\le$ M}
+            \While{$i + m \le N$}
+                \State $i \gets i + m$
+                \State Replace a random item in resevoir with $x_{i}$
+                \State $M \gets M \cdot \random()^{1/k}$
+                \Comment{distributed like $\max_{1 \le j \le j}(\UnifD(0, M))$}
+                \State $m \gets - \ln( \random() ) / M$
+                \Comment{$\GeomD(M)$, the steps before find a uniform with value $\le$ M}
+            \EndWhile
+        \EndFunction
+    \end{algorithmic}
+    \label{alg:samplejumps}
 \end{algorithm}
 
 \section{Prerequisites}
@@ -161,8 +162,8 @@ Using this observation, we can avoid examining each item one by one and instead 
 \label{sec:proofs}
 
 \begin{proof}[Theorem \ref{thm:rank}]
-	Suppose this.
-	Then, we win.
+    Suppose this.
+    Then, we win.
 \end{proof}
 
 % References
