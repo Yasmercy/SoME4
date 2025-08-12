@@ -4,7 +4,7 @@ import numpy as np
 
 
 def sample_botk(stream, k, rng):
-    """simple resevoir algorithm"""
+    """simple reservoir algorithm"""
 
     reservoir = []
     for value in stream:

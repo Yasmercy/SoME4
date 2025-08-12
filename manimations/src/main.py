@@ -1,3 +1,6 @@
+import pseudocode
+
+
 def main():
     print("Hello from manimations!")
 

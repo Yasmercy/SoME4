@@ -2,8 +2,9 @@ import manim as m
 
 
 class Pseudocode(m.Scene):
-    def __init__(self):
+    def __init__(self, func, code):
         super().__init__()
+
         self.preamble: m.TexTemplate = m.TexTemplate()
         self.preamble.add_to_preamble(r"\usepackage{algorithm}")
         self.preamble.add_to_preamble(r"\usepackage{algpseudocode}")
@@ -13,7 +14,7 @@ class Pseudocode(m.Scene):
             \makeatletter
             \newcommand{\algcolor}[2]{%
               {\hskip-\ALG@thistlm}
-              \colorbox{#1}{\parbox{\dimexpr\linewidth-2\fboxsep}
+              \colorbox{#1}{\parbox{10em}
               {\hskip\ALG@thistlm\relax #2}}%
             }
             \newcommand{\algemph}[1]{\algcolor{GreenYellow}{#1}}
@@ -21,43 +22,39 @@ class Pseudocode(m.Scene):
             """
         )
 
+        self.environ = "algorithmic"
+        self.func = func
+        self.code = code
+
+    def step_program(self, lines):
+        """
+        Highlight the lines in the program
+        """
+
+        def emph(code):
+            # only modify the code starting the second word
+            state = code.strip().split(" ")[0]
+            line = f"\\algemph{{{' '.join(code.strip().split(' ')[1:])}}}"
+            return f"{state} {line}\n"
+
+        code = [
+            code if line not in lines else emph(code)
+            for line, code in enumerate(self.code)
+        ]
+        program = "\n".join(code)
+
+        return m.Tex(program, tex_template=self.preamble, tex_environment=self.environ)
+
     def construct(self):
-        code1 = r"""
-        \begin{algorithmic}[1]
-            \Function{GenerateSample}{$D$, $k$} %1
-                \State Initialize a resevoir with the first $k$ keys %2
-                \For{each $i > k$ in increasing order} %3
-                    \State $y_i \gets \mathop{uniform}()$ %4
-                    \If{$y_i$ is in the lowest $k$ keys explored so far} %5
-                        \State Update the resevoir to include $x_i$ %6
-                    \EndIf %7
-                \EndFor %8
-            \EndFunction %9
-        \end{algorithmic}
-        """
-
-        alg1 = m.Tex(code1, tex_template=self.preamble)
-        self.play(m.Write(alg1))
+        program = self.step_program([])
+        self.play(m.Write(program))
         self.wait()
 
-        code2 = r"""
-        \begin{algorithmic}[1]
-            \Function{GenerateSample}{$D$, $k$}
-                \State Initialize a resevoir with the first $k$ keys
-                \For{each $i > k$ in increasing order}
-                    \State \algemph{$y_i \gets \mathop{uniform}()$}
-                    \If{$y_i$ is in the lowest $k$ keys explored so far}
-                        \State Update the resevoir to include $x_i$
-                    \EndIf
-                \EndFor
-            \EndFunction
-        \end{algorithmic}
-        """
+        # TODO: generate the lines based on the trace of self.func()
 
-        alg2 = m.Tex(code2, tex_template=self.preamble)
-        self.play(m.Transform(alg1, alg2))
-        self.wait()
-
-        # idea for API:
-        # add a decorator for a python function
-        # connect each line in the python with a line in the pseudocode
+        lines = [[1], [2], [3], [4]]
+        for line in lines:
+            old_program = program
+            new_program = self.step_program(line)
+            self.play(m.Transform(old_program, new_program))
+            self.wait()
