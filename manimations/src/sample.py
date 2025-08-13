@@ -18,38 +18,36 @@ class Action(Enum):
 
 
 program_permute = [
-    r"\Function{Sample}{$D$, $k$}",
     r"\State Initialize reservoir",
     r"\State \textbf{while} read item from stream",
-    r"\hskip1.0em \State Add item to reservoir",
+    r"    \State Add item to reservoir",
     r"\State Permute reservoir",
     r"\State Truncate reservoir",
-    r"\EndFunction",
 ]
 
 
 def sample_permute(stream, k, rng):
     # 1. Initialize reservoir
     reservoir = []
-    yield (1, Action.INIT, reservoir)
+    yield ([0], Action.INIT, reservoir)
 
     for value in stream:
         # 2. Read item from stream
-        yield (2, Action.READ, value)
+        yield ([1], Action.READ, value)
 
         # 3. Add to reservoir
         reservoir.append(value)
-        yield (3, Action.UPDATE, reservoir)
+        yield ([2], Action.UPDATE, reservoir)
 
     # 4. Permute reservoir
     reservoir = rng.permutation(reservoir)
     for _ in range(len(reservoir)):
-        yield (4, Action.RAND, None)
-    yield (4, Action.UPDATE, reservoir)
+        yield ([3], Action.RAND, None)
+    yield ([3], Action.UPDATE, reservoir)
 
     # 5. Truncate reservoir
     reservoir = reservoir[:k]
-    yield (5, Action.UPDATE, reservoir)
+    yield ([4], Action.UPDATE, reservoir)
 
 
 def sample_botk(stream, k, rng):
