@@ -1,9 +1,7 @@
 import pseudocode
-
+from manim import *
+from assets import *
 
 def main():
     print("Hello from manimations!")
 
-
-if __name__ == "__main__":
-    main()
