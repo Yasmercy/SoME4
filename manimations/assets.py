@@ -19,7 +19,7 @@ class Lightbulb(VGroup):
         bulb = Union(bulb, base, color=color, fill_color=fill_color if on else color, fill_opacity=0.7 if on else 0.2)
 
         base.next_to(base, DOWN, buff=-radius/4)
-        base = Union(base, base.copy().next_to(base, DOWN, buff=-radius/8), color=color, fill_color=GRAY, fill_opacity=1)
+        base = Union(base, base.copy().next_to(base, DOWN, buff=-radius/8)) #color=color, fill_color=GRAY, fill_opacity=1)
 
         self.add(bulb)
         self.add(filament)
