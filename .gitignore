@@ -1,4 +1,6 @@
 **/*.log
+**/media/
+**/*cache*/
 
 writeup/*
 !writeup/*.tex
