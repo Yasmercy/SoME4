@@ -1,7 +1,7 @@
 import itertools as it
 
 import manim as m
-from resevoir import Array
+from reservoir import Array
 from sample import Action
 
 
@@ -122,7 +122,9 @@ class Pseudocode(m.Scene):
         def animate_rand(state):
             """Add a new random number into the box. The state is the new number."""
             old_text = self.rng_text
-            self.rng_text = m.Text(f"{state:.2f}").move_to(self.rng_box.get_center())
+            self.rng_text = m.Text(f"{state:.2f}"[1:]).move_to(
+                self.rng_box.get_center()
+            )
             return [
                 m.ReplacementTransform(old_text, self.rng_text),
             ]
