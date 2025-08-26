@@ -50,39 +50,41 @@ def sample_permute(stream, k, rng):
     yield (4, Action.UPDATE, reservoir)
 
 
-def sample_botk(stream, k, rng):
+program_bottomk = [
+    "resevoir = init_resevoir()",
+    "for item in stream:",
+    "    key = generate_key()",
+    "    if key in lowest_k_keys(resevoir):",
+    "        add_to_resevoir(item, key)",
+]
+
+
+def sample_bottomk(stream, k, rng):
     # 1. Initialize reservoir
     reservoir = []
-    yield (1, Action.INIT, reservoir)
+    yield (0, Action.INIT, reservoir)
 
     for value in stream:
         # 2. Read item from stream
-        yield (2, Action.READ, value)
+        yield (1, Action.READ, value)
 
-        # 3. Check if reservoir has space
-        yield (3, Action.BRANCH, None)
-        if len(reservoir) < k:
-            # 4. Generate item
-            key = rng.random()
-            yield (4, Action.RAND, key)
-
-            # 5. Add to the reservoir
-            item = (-key, value)
-            q.heappush(reservoir, item)
-            yield (5, Action.UPDATE, reservoir)
-            continue
-
-        # 6. Generate item
+        # 3. Generate a random key
         key = rng.random()
-        item = (-key, value)
-        yield (6, Action.RAND, key)
+        yield (2, Action.RAND, key)
 
-        # 7. Check if less than maximum
-        yield (7, Action.BRANCH, None)
-        if key < -reservoir[0][0]:
-            # 8. Add to reservoir
-            q.heappushpop(reservoir, item)
-            yield (8, Action.UPDATE, reservoir)
+        # 4. Check if key is in bottom k
+        yield (3, Action.BRANCH, None)
+        if len(reservoir) < k or key < -reservoir[0][0]:
+            item = (-key, value)
+
+            # 5. Add to resevoir
+            q.heappush(reservoir, item)
+            if len(reservoir) > k:
+                q.heappop(reservoir)
+
+            out = [value for key, value in reservoir]
+            out.sort()
+            yield (4, Action.UPDATE, out)
 
 
 def sample_jumps(stream, k, rng):

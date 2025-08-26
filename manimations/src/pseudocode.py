@@ -151,8 +151,6 @@ class Pseudocode(m.Scene):
         self.play(self.init_construction())
 
         trace = self.func(*self.args)
-        # trace = list(trace)[:15]
         for lines, action, state in trace:
-            print(action, state)
             animations = self.step_program(lines) + self.step_animate(action, state)
             self.play(*animations)
