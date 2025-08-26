@@ -6,9 +6,9 @@ import sample
 class PermuteScene(pseudocode.Pseudocode):
     def __init__(self):
         def generate_stream(n):
-            rng = np.random.default_rng(1234)
+            rng = np.random.default_rng(1337)
             for _ in range(n):
-                yield rng.integers(n * n)
+                yield int(rng.integers(n * n))
 
         super().__init__(
             sample.sample_permute,
