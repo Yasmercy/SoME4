@@ -3,7 +3,7 @@ import pseudocode
 import sample
 
 
-class PermuteScene(pseudocode.Pseudocode):
+class BottomKScene(pseudocode.Pseudocode):
     def __init__(self):
         def generate_stream(n):
             rng = np.random.default_rng(1337)
@@ -11,8 +11,8 @@ class PermuteScene(pseudocode.Pseudocode):
                 yield int(rng.integers(n * n))
 
         super().__init__(
-            sample.sample_permute,
-            sample.program_permute,
+            sample.sample_bottomk,
+            sample.program_bottomk,
             generate_stream(10),
             5,
             np.random.default_rng(1234),

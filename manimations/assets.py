@@ -1,5 +1,6 @@
 from manim import *
 
+
 class Lightbulb(VGroup):
     def __init__(self, radius=0.5, color=WHITE, fill_color=YELLOW, on=False):
         VGroup.__init__(self)
