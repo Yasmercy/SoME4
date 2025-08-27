@@ -37,17 +37,17 @@ def sample_permute(stream, k, rng):
 
         # 3. Add to reservoir
         reservoir.append(value)
-        yield (2, Action.UPDATE, reservoir)
+        yield (2, Action.UPDATE, [(0, x) for x in reservoir])
 
     # 4. Permute reservoir
     reservoir = rng.permutation(reservoir)
     for _ in range(len(reservoir)):
         yield (3, Action.RAND, rng.random())
-    yield (3, Action.UPDATE, reservoir)
+    yield (3, Action.UPDATE, [(0, x) for x in reservoir])
 
     # 5. Truncate reservoir
     reservoir = reservoir[:k]
-    yield (4, Action.UPDATE, reservoir)
+    yield (4, Action.UPDATE, [(0, x) for x in reservoir])
 
 
 program_bottomk = [
@@ -82,7 +82,7 @@ def sample_bottomk(stream, k, rng):
             if len(reservoir) > k:
                 q.heappop(reservoir)
 
-            out = [value for key, value in reservoir]
+            out = [x for x in reservoir]
             out.sort()
             yield (4, Action.UPDATE, out)
 

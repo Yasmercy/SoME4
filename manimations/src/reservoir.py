@@ -1,8 +1,9 @@
 import manim as m
+from item import LabeledBox
 
 
 class Array(m.VGroup):
-    def __init__(self, cap, size, colors=None, buff=0.1, **kwargs):
+    def __init__(self, cap, size, colors=None, buff=0.1, texts=None, **kwargs):
         """
         Create a horizontal array of squares.
 
@@ -25,18 +26,25 @@ class Array(m.VGroup):
             assert len(colors) <= cap
             colors = colors + [m.WHITE] * (cap - size)
 
-        # Build squares
-        squares = m.VGroup()
-        for i in range(size):
-            sq = m.Square(side_length=1.0, **kwargs)
-            sq.set_fill(colors[i], opacity=1.0)
-            squares.add(sq)
-        for i in range(size, cap):
-            sq = m.Square(side_length=1.0, **kwargs)
-            sq.set_fill(colors[i], opacity=0.0)
-            squares.add(sq)
-        squares.arrange(m.RIGHT, buff=buff)
-        # Build bbox
-        bbox = m.SurroundingRectangle(squares, color=m.WHITE, stroke_width=2)
+        if texts is None:
+            texts = [""] * cap
+        elif not isinstance(texts, (list, tuple)):
+            texts = [texts] * cap
+        else:
+            assert len(texts) <= cap
+            texts = texts + [""] * (cap - size)
 
-        self.add(bbox, squares)
+        # Build squares
+        items = m.VGroup()
+        for i in range(cap):
+            sq = LabeledBox(
+                side_length=1.0, text=texts[i], show_text=bool(texts[i]), **kwargs
+            )
+            opacity = 1 if i < size else 0
+            sq.square.set_fill(colors[i], opacity=opacity)
+            items.add(sq)
+        items.arrange(m.RIGHT, buff=buff)
+        # Build bbox
+        bbox = m.SurroundingRectangle(items, color=m.WHITE, stroke_width=2)
+
+        self.add(bbox, items)
