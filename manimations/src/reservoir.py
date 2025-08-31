@@ -40,3 +40,4 @@ class Array(m.VGroup):
         bbox = m.SurroundingRectangle(squares, color=m.WHITE, stroke_width=2)
 
         self.add(bbox, squares)
+        self.squares = squares

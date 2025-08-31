@@ -2,7 +2,7 @@ from manim import *
 
 
 class Lightbulb(VGroup):
-    def __init__(self, radius=0.5, color=WHITE, fill_color=YELLOW, on=False):
+    def __init__(self, radius=0.5, color=WHITE, fill_color=YELLOW, on=False, cracked=False):
         VGroup.__init__(self)
 
         bulb = Circle(radius=radius)
@@ -17,6 +17,8 @@ class Lightbulb(VGroup):
         points += [base.get_critical_point(dir) for dir in [LEFT, RIGHT]]
 
         base = Union(base, Polygon(*points))
+        if cracked:
+            bulb = Difference(bulb, Sector(radius=radius+0.5, angle=45*DEGREES))
         bulb = Union(bulb, base, color=color, fill_color=fill_color if on else color, fill_opacity=0.7 if on else 0.2)
 
         base.next_to(base, DOWN, buff=-radius/4)
