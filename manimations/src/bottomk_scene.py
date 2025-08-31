@@ -13,7 +13,7 @@ class BottomKScene(pseudocode.Pseudocode):
         super().__init__(
             sample.sample_bottomk,
             sample.program_bottomk,
-            generate_stream(10),
+            generate_stream(6),
             5,
             np.random.default_rng(1234),
         )

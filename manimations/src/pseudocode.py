@@ -1,8 +1,39 @@
 import itertools as it
+from enum import Enum, auto
 
 import manim as m
+from item import LabeledBox
 from reservoir import Array
-from sample import Action
+
+
+def get_color(value):
+    colors = [
+        "blue",
+        "teal",
+        "green",
+        "yellow",
+        "gold",
+        "red",
+        "maroon",
+        "purple",
+    ]
+    modifiers = ["a", "c", "e"]
+    colors = ["_".join(x) for x in it.product(colors, modifiers)]
+
+    return colors[value % len(colors)]
+
+
+class Action(Enum):
+    # initializing the reservoir
+    INIT = auto()
+    # reading an element from the stream
+    READ = auto()
+    # updating the reservoir in some way
+    UPDATE = auto()
+    # generating a random number
+    RAND = auto()
+    # control flow
+    BRANCH = auto()
 
 
 class Pseudocode(m.Scene):
@@ -33,8 +64,8 @@ class Pseudocode(m.Scene):
         lines = self.program.code_lines.submobjects
         width = self.program.get_width()
         height = lines[0].get_height()
-        sep = lines[1].get_center()[1] - lines[0].get_center()[1]
-        top = lines[0].get_center()[1]
+        # sep = lines[1].get_center()[1] - lines[0].get_center()[1]
+        # top = lines[0].get_center()[1]
         self.highlights = m.VGroup(
             [
                 m.SurroundingRectangle(line, buff=0.05)
@@ -43,32 +74,18 @@ class Pseudocode(m.Scene):
                 .stretch_to_fit_width(width)
                 .stretch_to_fit_height(height)
                 .align_to(self.program, m.LEFT)
-                .set_y(top + i * sep)
+                .align_to(line, m.DOWN)
                 for i, line in enumerate(lines)
             ]
         )
         self.highlight = None
 
         # mobjects for the sampling
-        self.resevoir = Array(5, 0).to_edge(m.DOWN)
-        self.cursor = m.Square(side_length=1.0).to_corner(m.DOWN + m.RIGHT)
-        self.rng_box = m.Square(side_length=1.0).next_to(self.cursor, m.LEFT, buff=0.05)
-        self.rng_text = m.Text(".57").move_to(self.rng_box.get_center())
-
-    def get_color(self, i):
-        colors = [
-            "blue",
-            "teal",
-            "green",
-            "yellow",
-            "gold",
-            "red",
-            "maroon",
-            "purple",
-        ]
-        modifiers = ["a", "c", "e"]
-        colors = ["_".join(x) for x in it.product(colors, modifiers)]
-        return colors[i % len(colors)]
+        self.resevoir = Array(5, 0).to_edge(m.LEFT)
+        self.cursor = LabeledBox(side_length=1.0).to_corner(m.DOWN + m.RIGHT)
+        self.rng = LabeledBox(text=".00", show_text=True).next_to(
+            self.cursor, m.LEFT, buff=0.05
+        )
 
     def step_program(self, line):
         """
@@ -92,41 +109,45 @@ class Pseudocode(m.Scene):
             The state is the initial resevoir.
             """
 
-            # TODO: add an initial state to resevoir
             return [
                 m.Create(self.resevoir),
                 m.Create(self.cursor),
-                m.Create(self.rng_box),
-                m.Create(self.rng_text),
+                m.Create(self.rng),
             ]
 
         def animate_read(state):
             """New integer flows into the lens. The state is the new item."""
 
-            color = self.get_color(state)
+            color = get_color(state)
+            old_cursor = self.cursor
+            self.cursor = LabeledBox(
+                side_length=1.0, text=state, show_text=False
+            ).to_corner(m.DOWN + m.RIGHT)
+            self.cursor.square.set_fill(color, opacity=1)
             return [
-                self.cursor.animate.set_fill(color, opacity=0.5),
+                m.ReplacementTransform(old_cursor, self.cursor),
             ]
 
         def animate_update(state):
             """Match transform the resevoir. The state is the new resevoir."""
-            colors = [self.get_color(i) for i in state]
+            colors = [get_color(i) for _, i in state]
             old_resevoir = self.resevoir
+            texts = [f"{-key:.2f}"[1:] if key != 0 else "" for key, val in state]
             self.resevoir = Array(
-                cap=max(5, len(state)), size=len(state), colors=colors
-            ).to_edge(m.DOWN)
+                cap=max(5, len(state)), size=len(state), colors=colors, texts=texts
+            ).to_edge(m.LEFT)
             return [
                 m.ReplacementTransform(old_resevoir, self.resevoir),
             ]
 
         def animate_rand(state):
             """Add a new random number into the box. The state is the new number."""
-            old_text = self.rng_text
-            self.rng_text = m.Text(f"{state:.2f}"[1:]).move_to(
-                self.rng_box.get_center()
+            old_rng = self.rng
+            self.rng = LabeledBox(text=f"{state:.2f}"[1:], show_text=True).next_to(
+                self.cursor, m.LEFT, buff=0.05
             )
             return [
-                m.ReplacementTransform(old_text, self.rng_text),
+                m.ReplacementTransform(old_rng, self.rng),
             ]
 
         def animate_branch(state):
@@ -142,7 +163,7 @@ class Pseudocode(m.Scene):
         }
         return animations[action](state)
 
-    def init_construction(self):
+    def animate_program_init(self):
         animations = [
             m.Create(self.program),
             m.Create(self.highlights),
@@ -150,6 +171,7 @@ class Pseudocode(m.Scene):
         return animations
 
     def construct(self):
+        # TODO: add an option to toggle visibility of the program/highlights
         self.play(self.init_construction())
 
         trace = self.func(*self.args)
